@@ -1,0 +1,11 @@
+---
+- name: Install Prometheus Node Exporter on Raspberry Pis
+  apt:
+    name: prometheus-node-exporter
+    state: present
+
+- name: Ensure Node Exporter is running
+  service:
+    name: prometheus-node-exporter
+    enabled: yes
+    state: started

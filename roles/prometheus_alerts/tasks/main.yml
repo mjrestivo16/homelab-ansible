@@ -1,0 +1,28 @@
+---
+- name: Deploy Prometheus alert rules
+  copy:
+    dest: /etc/prometheus/alert.rules.yml
+    content: |
+      groups:
+        - name: system_alerts
+          rules:
+            - alert: HighCPUUsage
+              expr: 100 - (avg by(instance)(irate(node_cpu_seconds_total{mode='idle'}[5m])) * 100) > 85
+              for: 5m
+              labels:
+                severity: warning
+              annotations:
+                summary: "High CPU usage on {{ $labels.instance }}"
+                description: "CPU usage is above 85% for more than 5 minutes."
+
+- name: Ensure alert rules are referenced in Prometheus config
+  lineinfile:
+    path: /etc/prometheus/prometheus.yml
+    regexp: '^ *- "alert.rules.yml"$'
+    line: '  - "alert.rules.yml"'
+    insertafter: 'rule_files:'
+
+- name: Restart Prometheus
+  systemd:
+    name: prometheus
+    state: restarted

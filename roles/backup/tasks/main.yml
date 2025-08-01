@@ -1,0 +1,20 @@
+---
+- name: Install rsync
+  apt:
+    name: rsync
+    state: present
+
+- name: Create backup script
+  copy:
+    dest: /usr/local/bin/run_backup.sh
+    mode: '0755'
+    content: |
+      #!/bin/bash
+      rsync -a --delete /etc /home /var/log /opt /mnt/backup/
+
+- name: Create backup cron job
+  cron:
+    name: "Nightly backup to /mnt/backup"
+    job: "/usr/local/bin/run_backup.sh"
+    minute: "0"
+    hour: "2"

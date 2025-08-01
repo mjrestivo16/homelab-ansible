@@ -1,0 +1,17 @@
+---
+- name: Install required packages
+  apt:
+    name: [prometheus, grafana]
+    state: present
+
+- name: Enable and start Prometheus
+  systemd:
+    name: prometheus
+    enabled: yes
+    state: started
+
+- name: Enable and start Grafana
+  systemd:
+    name: grafana-server
+    enabled: yes
+    state: started

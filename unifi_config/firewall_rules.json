@@ -1,0 +1,24 @@
+[
+  {
+    "name": "Allow DNS to Internet",
+    "rule_action": "accept",
+    "protocol": "udp",
+    "port": 53,
+    "src_network": "DNS",
+    "dst_network": "WAN"
+  },
+  {
+    "name": "Block IOT to TRUSTED",
+    "rule_action": "drop",
+    "protocol": "all",
+    "src_network": "IOT",
+    "dst_network": "TRUSTED"
+  },
+  {
+    "name": "Allow MGMT to ALL",
+    "rule_action": "accept",
+    "protocol": "all",
+    "src_network": "MGMT",
+    "dst_network": "any"
+  }
+]

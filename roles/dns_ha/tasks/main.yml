@@ -1,0 +1,25 @@
+---
+- name: Ensure dnsmasq is installed
+  apt:
+    name: dnsmasq
+    state: present
+
+- name: Configure dnsmasq fallback to secondary DNS
+  copy:
+    dest: /etc/dnsmasq.d/02-fallback.conf
+    content: |
+      server=192.168.53.2
+      server=1.1.1.1
+  notify: Restart dnsmasq
+
+- name: Enable and start dnsmasq
+  service:
+    name: dnsmasq
+    enabled: yes
+    state: started
+
+handlers:
+  - name: Restart dnsmasq
+    service:
+      name: dnsmasq
+      state: restarted

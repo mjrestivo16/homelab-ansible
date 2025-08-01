@@ -1,0 +1,17 @@
+---
+- name: Add Tailscale GPG key
+  shell: curl -fsSL https://pkgs.tailscale.com/stable/ubuntu/focal.gpg | gpg --dearmor -o /usr/share/keyrings/tailscale-archive-keyring.gpg
+
+- name: Add Tailscale repository
+  apt_repository:
+    repo: "deb [signed-by=/usr/share/keyrings/tailscale-archive-keyring.gpg] https://pkgs.tailscale.com/stable/ubuntu focal main"
+    state: present
+
+- name: Install Tailscale
+  apt:
+    name: tailscale
+    state: present
+
+- name: Authenticate Tailscale
+  shell: tailscale up --authkey {{ tailscale_authkey }}
+  when: tailscale_authkey is defined

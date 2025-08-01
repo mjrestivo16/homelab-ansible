@@ -1,0 +1,3 @@
+---
+pihole_timezone: "America/New_York"
+pihole_webpassword: "changeme"

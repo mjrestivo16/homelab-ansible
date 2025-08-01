@@ -1,0 +1,25 @@
+---
+- name: Create Home Assistant directory
+  file:
+    path: /opt/home-assistant
+    state: directory
+
+- name: Deploy Home Assistant via Docker Compose
+  copy:
+    dest: /opt/home-assistant/docker-compose.yml
+    content: |
+      version: "3"
+      services:
+        homeassistant:
+          container_name: homeassistant
+          image: ghcr.io/home-assistant/home-assistant:stable
+          volumes:
+            - ./config:/config
+            - /etc/localtime:/etc/localtime:ro
+          restart: unless-stopped
+          network_mode: host
+
+- name: Start Home Assistant
+  shell: docker compose up -d
+  args:
+    chdir: /opt/home-assistant

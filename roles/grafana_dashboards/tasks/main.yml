@@ -1,0 +1,47 @@
+---
+- name: Ensure Grafana dashboards directory exists
+  file:
+    path: /etc/grafana/provisioning/dashboards
+    state: directory
+    recurse: yes
+
+- name: Provision basic dashboard JSON
+  copy:
+    dest: /etc/grafana/provisioning/dashboards/node-overview.json
+    content: |
+      {
+        "annotations": {
+          "list": []
+        },
+        "panels": [
+          {
+            "type": "graph",
+            "title": "CPU Usage",
+            "targets": [
+              {
+                "expr": "100 - (avg by(instance)(irate(node_cpu_seconds_total{mode='idle'}[5m])) * 100)",
+                "format": "time_series"
+              }
+            ]
+          }
+        ],
+        "title": "Node Overview",
+        "timezone": "browser",
+        "schemaVersion": 16,
+        "version": 1
+      }
+
+- name: Ensure dashboard provider is configured
+  copy:
+    dest: /etc/grafana/provisioning/dashboards/default.yaml
+    content: |
+      apiVersion: 1
+      providers:
+        - name: 'default'
+          orgId: 1
+          folder: ''
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /etc/grafana/provisioning/dashboards

@@ -1,0 +1,28 @@
+---
+- name: Ensure .ssh directory exists
+  file:
+    path: "/home/{{ ansible_user }}/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+
+- name: Generate SSH key pair on control node
+  delegate_to: localhost
+  openssh_keypair:
+    path: "~/.ssh/id_rsa"
+    type: rsa
+    size: 4096
+  run_once: true
+
+- name: Fetch public key from control node
+  delegate_to: localhost
+  slurp:
+    src: "~/.ssh/id_rsa.pub"
+  register: pub_key
+  run_once: true
+
+- name: Deploy public key to managed node
+  authorized_key:
+    user: "{{ ansible_user }}"
+    key: "{{ pub_key['content'] | b64decode }}"

@@ -1,0 +1,31 @@
+---
+- name: Install NUT client
+  apt:
+    name: nut-client
+    state: present
+
+- name: Configure NUT to talk to remote UPS server
+  copy:
+    dest: /etc/nut/nut.conf
+    content: |
+      MODE=netclient
+
+- name: Configure upsmon
+  copy:
+    dest: /etc/nut/upsmon.conf
+    content: |
+      MONITOR ups@truenas.local 1 monuser password slave
+      SHUTDOWNCMD "/sbin/shutdown -h +0"
+      POLLFREQ 5
+      POLLFREQALERT 5
+      HOSTSYNC 15
+      DEADTIME 25
+      POWERDOWNFLAG /etc/killpower
+      RBWARNTIME 43200
+      NOCOMMWARNTIME 300
+      FINALDELAY 5
+
+- name: Restart NUT client
+  service:
+    name: nut-client
+    state: restarted

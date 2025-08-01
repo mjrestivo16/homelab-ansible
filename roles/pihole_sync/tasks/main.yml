@@ -1,0 +1,19 @@
+---
+- name: Check if this is the source Pi-hole (pi1.local)
+  set_fact:
+    is_source: "{{ inventory_hostname == 'pi1.local' }}"
+
+- name: Synchronize Pi-hole config to other Pi-hole nodes
+  synchronize:
+    src: /etc/pihole/
+    dest: /etc/pihole/
+    recursive: yes
+    delete: yes
+  when: not is_source
+  delegate_to: pi1.local
+
+- name: Restart Pi-hole FTL service
+  service:
+    name: pihole-FTL
+    state: restarted
+  when: not is_source

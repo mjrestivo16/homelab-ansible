@@ -1,0 +1,25 @@
+---
+- name: Create Uptime Kuma directory
+  file:
+    path: /opt/uptime-kuma
+    state: directory
+
+- name: Deploy Uptime Kuma with Docker Compose
+  copy:
+    dest: /opt/uptime-kuma/docker-compose.yml
+    content: |
+      version: "3"
+      services:
+        uptime-kuma:
+          image: louislam/uptime-kuma:latest
+          container_name: uptime-kuma
+          restart: unless-stopped
+          ports:
+            - "3001:3001"
+          volumes:
+            - ./data:/app/data
+
+- name: Start Uptime Kuma
+  shell: docker compose up -d
+  args:
+    chdir: /opt/uptime-kuma

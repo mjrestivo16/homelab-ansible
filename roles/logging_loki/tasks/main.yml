@@ -1,0 +1,86 @@
+---
+- name: Create Loki + Promtail directory
+  file:
+    path: /opt/loki-stack
+    state: directory
+
+- name: Deploy Loki + Promtail via Docker Compose
+  copy:
+    dest: /opt/loki-stack/docker-compose.yml
+    content: |
+      version: "3"
+      services:
+        loki:
+          image: grafana/loki:2.9.1
+          ports:
+            - "3100:3100"
+          command: -config.file=/etc/loki/local-config.yaml
+          volumes:
+            - ./loki-config.yaml:/etc/loki/local-config.yaml
+
+        promtail:
+          image: grafana/promtail:2.9.1
+          volumes:
+            - /var/log:/var/log
+            - ./promtail-config.yaml:/etc/promtail/config.yaml
+          command: -config.file=/etc/promtail/config.yaml
+
+- name: Provide Loki config
+  copy:
+    dest: /opt/loki-stack/loki-config.yaml
+    content: |
+      auth_enabled: false
+      server:
+        http_listen_port: 3100
+      ingester:
+        lifecycler:
+          ring:
+            kvstore:
+              store: inmemory
+            replication_factor: 1
+        chunk_idle_period: 5m
+        max_chunk_age: 1h
+      schema_config:
+        configs:
+          - from: 2022-01-01
+            store: boltdb-shipper
+            object_store: filesystem
+            schema: v11
+            index:
+              prefix: index_
+              period: 168h
+      storage_config:
+        boltdb_shipper:
+          active_index_directory: /tmp/loki/index
+          cache_location: /tmp/loki/boltdb-cache
+          shared_store: filesystem
+        filesystem:
+          directory: /tmp/loki/chunks
+
+- name: Provide Promtail config
+  copy:
+    dest: /opt/loki-stack/promtail-config.yaml
+    content: |
+      server:
+        http_listen_port: 9080
+        grpc_listen_port: 0
+
+      positions:
+        filename: /tmp/positions.yaml
+
+      clients:
+        - url: http://localhost:3100/loki/api/v1/push
+
+      scrape_configs:
+        - job_name: system
+          static_configs:
+            - targets:
+                - localhost
+              labels:
+                job: varlogs
+                __path__: /var/log/*.log
+
+- name: Start Loki stack
+  shell: docker compose up -d
+  args:
+    chdir: /opt/loki-stack

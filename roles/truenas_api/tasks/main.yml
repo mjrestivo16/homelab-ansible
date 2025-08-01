@@ -1,0 +1,14 @@
+---
+- name: Snapshot a dataset via TrueNAS API
+  uri:
+    url: "http://truenas.local/api/v2.0/zfs/snapshot"
+    method: POST
+    user: root
+    password: "{{ truenas_api_key }}"
+    body_format: json
+    headers:
+      Content-Type: "application/json"
+    body:
+      dataset: "tank/vmdata"
+      name: "ansible-snapshot-{{ ansible_date_time.iso8601 }}"
+  register: snapshot_response

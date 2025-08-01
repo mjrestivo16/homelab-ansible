@@ -1,0 +1,27 @@
+---
+- name: Create directory for NGINX Proxy Manager
+  file:
+    path: /opt/nginx-proxy-manager
+    state: directory
+
+- name: Copy Docker Compose file
+  copy:
+    dest: /opt/nginx-proxy-manager/docker-compose.yml
+    content: |
+      version: "3"
+      services:
+        app:
+          image: 'jc21/nginx-proxy-manager:latest'
+          restart: unless-stopped
+          ports:
+            - '80:80'
+            - '81:81'
+            - '443:443'
+          volumes:
+            - ./data:/data
+            - ./letsencrypt:/etc/letsencrypt
+
+- name: Start NGINX Proxy Manager
+  shell: docker compose up -d
+  args:
+    chdir: /opt/nginx-proxy-manager

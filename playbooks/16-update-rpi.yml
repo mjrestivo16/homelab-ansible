@@ -1,0 +1,3 @@
+- hosts: raspberry_pi
+  roles:
+    - update_rpi

@@ -1,0 +1,21 @@
+---
+- name: Enable UFW
+  ufw:
+    state: enabled
+
+- name: Allow SSH
+  ufw:
+    rule: allow
+    name: OpenSSH
+
+- name: Allow Pi-hole DNS and Web
+  ufw:
+    rule: allow
+    port: [53, 80]
+    proto: tcp
+
+- name: Allow ICMP
+  ufw:
+    rule: allow
+    port: 0
+    proto: icmp
